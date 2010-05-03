@@ -6,7 +6,7 @@ from five import grok
 from zope.app.container.interfaces import (
     IObjectMovedEvent, IObjectAddedEvent, IObjectRemovedEvent)
 from zope.lifecycleevent.interfaces import (
-    IObjectCreatedEvent, IObjectCopiedEvent)
+    IObjectCreatedEvent, IObjectCopiedEvent, IObjectModifiedEvent)
 
 
 from OFS.interfaces import IObjectWillBeRemovedEvent
@@ -35,6 +35,11 @@ def log_delete(content, event):
 def log_add(content, event):
     if content is event.object:
         SecurityEvent('add', content).log()
+
+
+@grok.subscribe(ISilvaObject, IObjectModifiedEvent)
+def log_modify(content, event):
+    SecurityEvent('modify', content).log()
 
 
 @grok.subscribe(ISilvaObject, IObjectMovedEvent)

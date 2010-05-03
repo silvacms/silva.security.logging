@@ -11,6 +11,7 @@ from silva.security.logging.interfaces import ILoggingStorage
 logger = logging.getLogger("silva.security.logging")
 
 
+
 class PythonLogger(grok.GlobalUtility):
     grok.implements(ILoggingStorage)
     grok.name('Python Logger')
