@@ -62,6 +62,12 @@ class ZopeSQLStorage(grok.GlobalUtility):
     storage_conf = silvaforms.Fields(ISQLStorageConfiguration)
 
     def configure(self, context):
-        connection = getattr(
-            context, context.storage_conf['sql_connection_id'])
+        if 'sql_connection_id' not in context.storage_conf:
+            logger.error('SQL logger not properly configured')
+            return
+        connection_id = context.storage_conf['sql_connection_id']
+        try:
+            connection = getattr(context, connection_id)
+        except AttributeError:
+            logger.error('SQL connection %s no longer exists' % connection_id)
         return ZopeSQLLogger(connection)

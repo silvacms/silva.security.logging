@@ -5,7 +5,7 @@
 from AccessControl import getSecurityManager
 
 from five import grok
-from zope.app.intid.interfaces import IIntIds
+from zope.intid.interfaces import IIntIds
 from zope.component import queryUtility
 
 from silva.security.logging.interfaces import (

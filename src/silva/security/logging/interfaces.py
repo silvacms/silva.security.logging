@@ -23,6 +23,7 @@ class ISecurityEvent(Interface):
 class ILoggingStorage(Interface):
     """Describe a logging storage.
     """
+    storage_conf = Attribute(u"Configuration fields for this storage")
 
     def configure(context):
         """Return a logger for the given context.
@@ -55,7 +56,6 @@ def available_sql_connections(context):
 class ISecurityLoggingConfiguration(Interface):
     """Configuration for the Security Logging service.
     """
-
     storage_name = schema.Choice(
         title=u"Log storage",
         source=available_storages)
@@ -64,7 +64,6 @@ class ISecurityLoggingConfiguration(Interface):
 class ISQLStorageConfiguration(Interface):
     """Configuration settings for the SQL storage
     """
-
     sql_connection_id = schema.Choice(
         title=u"SQL Connection",
         source=available_sql_connections)
@@ -74,7 +73,12 @@ class ISecurityLoggingService(
     ISilvaLocalService, ISecurityLoggingConfiguration):
     """Local service to log security event.
     """
+    storage_conf = Attribute(u"Configuration for the storage")
 
     def get_storage():
         """Return storage used to log events.
+        """
+
+    def get_logger():
+        """Return storage's logger to log events.
         """
