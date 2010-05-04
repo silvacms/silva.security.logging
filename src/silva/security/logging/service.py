@@ -80,7 +80,6 @@ class StorageConfiguration(silvaforms.SubForm):
         return self.context.get_storage().storage_conf
 
     def update(self):
-        self.setContentData(DictDataManager(
-                aq_inner(self.context).storage_conf))
+        self.setContentData(DictDataManager(self.context.storage_conf))
 
 
