@@ -9,6 +9,9 @@ from zope.interface import Interface, Attribute
 from zope.schema.vocabulary import SimpleVocabulary, SimpleTerm
 from zope.schema.interfaces import IContextSourceBinder
 
+from Products.ZSQLMethods.SQL import SQLConnectionIDs
+from Acquisition import aq_inner
+
 from silva.core.interfaces import ISilvaLocalService
 
 
@@ -19,6 +22,15 @@ class ISecurityEvent(Interface):
 
 class ILoggingStorage(Interface):
     """Describe a logging storage.
+    """
+
+    def configure(context):
+        """Return a logger for the given context.
+        """
+
+
+class ILogger(Interface):
+    """A logger able to log an event.
     """
 
     def log(event):
@@ -33,6 +45,13 @@ def available_storages(context):
             getUtilitiesFor(ILoggingStorage)))
 
 
+@grok.provider(IContextSourceBinder)
+def available_sql_connections(context):
+    return SimpleVocabulary(
+        map(lambda (name, title): SimpleTerm(value=name, title=title),
+            SQLConnectionIDs(aq_inner(context))))
+
+
 class ISecurityLoggingConfiguration(Interface):
     """Configuration for the Security Logging service.
     """
@@ -40,6 +59,15 @@ class ISecurityLoggingConfiguration(Interface):
     storage_name = schema.Choice(
         title=u"Log storage",
         source=available_storages)
+
+
+class ISQLStorageConfiguration(Interface):
+    """Configuration settings for the SQL storage
+    """
+
+    sql_connection_id = schema.Choice(
+        title=u"SQL Connection",
+        source=available_sql_connections)
 
 
 class ISecurityLoggingService(

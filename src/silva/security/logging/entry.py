@@ -49,7 +49,6 @@ class SecurityEvent(object):
     def log(self):
         service = queryUtility(ISecurityLoggingService)
         if service is not None:
-            storage = service.get_storage()
-            if storage is not None:
-                storage.log(self)
+            logger = service.get_logger()
+            logger.log(self)
 

@@ -8,12 +8,11 @@ from zope.app.container.interfaces import (
 from zope.lifecycleevent.interfaces import (
     IObjectCreatedEvent, IObjectCopiedEvent, IObjectModifiedEvent)
 
-
 from OFS.interfaces import IObjectWillBeRemovedEvent
 
 from silva.security.logging.entry import SecurityEvent, get_path
 from silva.core.interfaces import events
-from silva.core.interfaces import ISilvaObject, IContent
+from silva.core.interfaces import ISilvaObject, IContent, IVersion, IContainer
 
 
 @grok.subscribe(ISilvaObject, IObjectCreatedEvent)
@@ -25,21 +24,25 @@ def log_create(content, event):
         SecurityEvent('create', content).log()
 
 
+@grok.subscribe(IVersion, IObjectWillBeRemovedEvent)
 @grok.subscribe(ISilvaObject, IObjectWillBeRemovedEvent)
 def log_delete(content, event):
     if content is event.object:
         SecurityEvent('delete', content).log()
 
 
+@grok.subscribe(IVersion, IObjectAddedEvent)
 @grok.subscribe(ISilvaObject, IObjectAddedEvent)
 def log_add(content, event):
     if content is event.object:
         SecurityEvent('add', content).log()
 
 
+@grok.subscribe(IVersion, IObjectModifiedEvent)
 @grok.subscribe(ISilvaObject, IObjectModifiedEvent)
 def log_modify(content, event):
-    SecurityEvent('modify', content).log()
+    if not IContainer.providedBy(content):
+        SecurityEvent('modify', content).log()
 
 
 @grok.subscribe(ISilvaObject, IObjectMovedEvent)
