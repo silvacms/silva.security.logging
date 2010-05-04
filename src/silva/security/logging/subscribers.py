@@ -3,8 +3,9 @@
 # $Id$
 
 from five import grok
-from zope.app.container.interfaces import (
-    IObjectMovedEvent, IObjectAddedEvent, IObjectRemovedEvent)
+from zope.container.interfaces import (
+    IObjectMovedEvent, IObjectAddedEvent, IObjectRemovedEvent,
+    IContainerModifiedEvent)
 from zope.lifecycleevent.interfaces import (
     IObjectCreatedEvent, IObjectCopiedEvent, IObjectModifiedEvent)
 
@@ -41,7 +42,9 @@ def log_add(content, event):
 @grok.subscribe(IVersion, IObjectModifiedEvent)
 @grok.subscribe(ISilvaObject, IObjectModifiedEvent)
 def log_modify(content, event):
-    if not IContainer.providedBy(content):
+    if IContainerModifiedEvent.providedBy(event):
+        SecurityEvent('modify the container', content).log()
+    else:
         SecurityEvent('modify', content).log()
 
 
@@ -54,3 +57,26 @@ def log_move(content, event):
                 get_path(event.oldParent), event.oldName,
                 get_path(event.newParent), event.newName)
             SecurityEvent('move', content, detail).log()
+
+
+@grok.subscribe(ISilvaObject, events.ISecurityRestrictionModifiedEvent)
+def log_security_restriction_set(content, event):
+    if event.role:
+        detail = 'with role %s' % event.role
+        SecurityEvent('set a access restriction to', content, detail).log()
+    else:
+        SecurityEvent('remove the access restriction to', content).log()
+
+
+@grok.subscribe(ISilvaObject, events.ISecurityRoleAddedEvent)
+def log_security_add_role(content, event):
+    detail = 'for %r roles %s' % (event.username, ', '.join(event.roles))
+    SecurityEvent('changed roles on', content, detail).log()
+
+
+@grok.subscribe(ISilvaObject, events.ISecurityRoleRemovedEvent)
+def log_security_remove_role(content, event):
+    detail = 'for %r' % event.username
+    if event.roles:
+        detail += ' roles %s' % ', '.join(event.roles)
+    SecurityEvent('removed roles on', content, detail).log()

@@ -22,10 +22,10 @@ class PythonLogger(grok.GlobalUtility):
     storage_conf = silvaforms.Fields()
 
     def log(self, event):
-        msg = '"%s" did %s %s'
+        msg = u'%r did %s on %s'
         info = [event.username, event.action, event.content_path]
         if event.detail:
-            msg += ' (%s)'
+            msg += u' (%s)'
             info.append(event.detail)
         logger.info(msg % tuple(info))
 
