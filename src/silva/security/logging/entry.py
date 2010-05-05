@@ -6,6 +6,7 @@ from AccessControl import getSecurityManager
 
 from five import grok
 from zope.intid.interfaces import IIntIds
+from zope.keyreference.interfaces import NotYet
 from zope.component import queryUtility
 
 from silva.security.logging.interfaces import (
@@ -30,7 +31,10 @@ def get_id(content):
     """
     service = queryUtility(IIntIds)
     if service is not None:
-        return service.register(content)
+        try:
+            return service.register(content)
+        except NotYet:
+            return None
     return None
 
 
