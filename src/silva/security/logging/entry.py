@@ -34,8 +34,8 @@ def get_id(content):
         try:
             return service.register(content)
         except NotYet:
-            return None
-    return None
+            return 0
+    return 0
 
 
 class SecurityEvent(object):
