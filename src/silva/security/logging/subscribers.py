@@ -13,7 +13,7 @@ from OFS.interfaces import IObjectWillBeRemovedEvent
 
 from silva.security.logging.entry import SecurityEvent, get_path
 from silva.core.interfaces import events
-from silva.core.interfaces import ISilvaObject, IContent, IVersion, IContainer
+from silva.core.interfaces import ISilvaObject, IVersion
 
 
 @grok.subscribe(ISilvaObject, IObjectCreatedEvent)
@@ -80,3 +80,28 @@ def log_security_remove_role(content, event):
     if event.roles:
         detail += ' roles %s' % ', '.join(event.roles)
     SecurityEvent('removed roles on', content, detail).log()
+
+
+@grok.subscribe(IVersion, events.IContentRequestApprovalEvent)
+def log_publication_request_approval(content, event):
+    SecurityEvent('request approval', content).log()
+
+
+@grok.subscribe(IVersion, events.IContentApprovalRequestCanceledEvent)
+def log_publication_approval_request_cancel(content, event):
+    SecurityEvent('cancel request approval', content).log()
+
+
+@grok.subscribe(IVersion, events.IContentApprovalRequestRefusedEvent)
+def log_publication_approval_request_refused(content, event):
+    SecurityEvent('refuse request approval', content).log()
+
+
+@grok.subscribe(IVersion, events.IContentPublishedEvent)
+def log_publication_published(content, event):
+    SecurityEvent('publish', content).log()
+
+
+@grok.subscribe(IVersion, events.IContentClosedEvent)
+def log_publication_closed(content, event):
+    SecurityEvent('close', content).log()
