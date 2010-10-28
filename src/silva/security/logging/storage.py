@@ -13,7 +13,6 @@ from silva.security.logging.interfaces import (
 logger = logging.getLogger("silva.security.logging")
 
 
-
 class PythonLogger(grok.GlobalUtility):
     grok.implements(ILoggingStorage, ILogger)
     grok.provides(ILoggingStorage)
@@ -64,10 +63,31 @@ class ZopeSQLStorage(grok.GlobalUtility):
     def configure(self, context):
         if 'sql_connection_id' not in context.storage_conf:
             logger.error('SQL logger not properly configured')
-            return
+            return None
         connection_id = context.storage_conf['sql_connection_id']
         try:
             connection = getattr(context, connection_id)
         except AttributeError:
             logger.error('SQL connection %s no longer exists' % connection_id)
         return ZopeSQLLogger(connection)
+
+
+class MemoryLogger(grok.GlobalUtility):
+    grok.implements(ILoggingStorage, ILogger)
+    grok.provides(ILoggingStorage)
+    grok.name('Memory Logger (for testing)')
+
+    storage_conf = silvaforms.Fields()
+    records = []                # Records will be stored on the class
+
+    def log(self, event):
+        info = [event.username, event.action, event.content_path]
+        if event.detail:
+            info.append(event.detail)
+        self.records.append(info)
+
+    def purge(self):
+        del self.records[:]
+
+    def configure(self, context):
+        return self
