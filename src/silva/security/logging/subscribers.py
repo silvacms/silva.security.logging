@@ -87,7 +87,7 @@ def log_publication_request_approval(content, event):
     SecurityEvent('request approval', content).log()
 
 
-@grok.subscribe(IVersion, events.IContentApprovalRequestCanceledEvent)
+@grok.subscribe(IVersion, events.IContentApprovalRequestWithdrawnEvent)
 def log_publication_approval_request_cancel(content, event):
     SecurityEvent('cancel request approval', content).log()
 
