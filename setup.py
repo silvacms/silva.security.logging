@@ -1,7 +1,11 @@
 from setuptools import setup, find_packages
 import os
 
-version = '1.1dev'
+version = '1.1'
+
+tests_require = [
+    'Products.Silva [test]',
+    ]
 
 setup(name='silva.security.logging',
       version=version,
@@ -40,4 +44,6 @@ setup(name='silva.security.logging',
         'zope.lifecycleevent',
         'zope.schema',
         ],
+      tests_require = tests_require,
+      extras_require = {'test': tests_require},
       )

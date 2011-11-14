@@ -24,13 +24,11 @@ def log_create(content, event):
     else:
         SecurityEvent('create', content).log()
 
-
 @grok.subscribe(IVersion, IObjectWillBeRemovedEvent)
 @grok.subscribe(ISilvaObject, IObjectWillBeRemovedEvent)
 def log_delete(content, event):
     if content is event.object:
         SecurityEvent('delete', content).log()
-
 
 @grok.subscribe(IVersion, IObjectAddedEvent)
 @grok.subscribe(ISilvaObject, IObjectAddedEvent)
@@ -38,15 +36,14 @@ def log_add(content, event):
     if content is event.object:
         SecurityEvent('add', content).log()
 
-
 @grok.subscribe(IVersion, IObjectModifiedEvent)
 @grok.subscribe(ISilvaObject, IObjectModifiedEvent)
 def log_modify(content, event):
-    if IContainerModifiedEvent.providedBy(event):
-        SecurityEvent('modify the container', content).log()
-    else:
-        SecurityEvent('modify', content).log()
-
+    if not events.IPublishingEvent.providedBy(event):
+        if IContainerModifiedEvent.providedBy(event):
+            SecurityEvent('modify the container', content).log()
+        else:
+            SecurityEvent('modify', content).log()
 
 @grok.subscribe(ISilvaObject, IObjectMovedEvent)
 def log_move(content, event):
@@ -58,6 +55,13 @@ def log_move(content, event):
                 get_path(event.newParent), event.newName)
             SecurityEvent('move', content, detail).log()
 
+@grok.subscribe(ISilvaObject, events.IContentOrderChangedEvent)
+def log_order_changed(content, event):
+    detail = 'from %s to %s' % (event.old_position, event.new_position)
+    SecurityEvent('order changed', content, detail).log()
+
+
+# Security changes
 
 @grok.subscribe(ISilvaObject, events.ISecurityRestrictionModifiedEvent)
 def log_security_restriction_set(content, event):
@@ -67,12 +71,10 @@ def log_security_restriction_set(content, event):
     else:
         SecurityEvent('remove the access restriction to', content).log()
 
-
 @grok.subscribe(ISilvaObject, events.ISecurityRoleAddedEvent)
 def log_security_add_role(content, event):
     detail = 'for %r roles %s' % (event.username, ', '.join(event.roles))
     SecurityEvent('changed roles on', content, detail).log()
-
 
 @grok.subscribe(ISilvaObject, events.ISecurityRoleRemovedEvent)
 def log_security_remove_role(content, event):
@@ -82,25 +84,31 @@ def log_security_remove_role(content, event):
     SecurityEvent('removed roles on', content, detail).log()
 
 
+# Publication events
+
 @grok.subscribe(IVersion, events.IContentRequestApprovalEvent)
 def log_publication_request_approval(content, event):
     SecurityEvent('request approval', content).log()
-
 
 @grok.subscribe(IVersion, events.IContentApprovalRequestWithdrawnEvent)
 def log_publication_approval_request_cancel(content, event):
     SecurityEvent('cancel request approval', content).log()
 
-
 @grok.subscribe(IVersion, events.IContentApprovalRequestRefusedEvent)
 def log_publication_approval_request_refused(content, event):
-    SecurityEvent('refuse request approval', content).log()
+    SecurityEvent('reject request approval', content).log()
 
+@grok.subscribe(IVersion, events.IContentApprovedEvent)
+def log_publication_approved(content, event):
+    SecurityEvent('approve', content).log()
+
+@grok.subscribe(IVersion, events.IContentUnApprovedEvent)
+def log_publication_unapproved(content, event):
+    SecurityEvent('revoke', content).log()
 
 @grok.subscribe(IVersion, events.IContentPublishedEvent)
 def log_publication_published(content, event):
     SecurityEvent('publish', content).log()
-
 
 @grok.subscribe(IVersion, events.IContentClosedEvent)
 def log_publication_closed(content, event):

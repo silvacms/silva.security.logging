@@ -4,11 +4,10 @@
 # $Id$
 
 import unittest
-
-import DateTime
-from Products.Silva.tests.helpers import publish_content
+from datetime import datetime, timedelta
 
 from zope.component import queryUtility
+from silva.core.interfaces import IPublicationWorkflow
 from silva.security.logging.testing import FunctionalLayer
 from silva.security.logging.interfaces import ISecurityLoggingService
 
@@ -23,7 +22,8 @@ class AssertLog(object):
         self.test.logger.purge()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.test.assertEqual(self.expected, self.test.logger.records)
+        if exc_type is None:
+            self.test.assertEqual(self.expected, self.test.logger.records)
         self.test.logger.purge()
 
 
@@ -99,60 +99,81 @@ class SubscribersTestCase(unittest.TestCase):
              ['editor', 'modify the container', '/root']]):
             self.root.manage_delObjects(['folder'])
 
-    def test_publication(self):
-        factory = self.root.manage_addProduct['SilvaDocument']
-        factory.manage_addDocument('document', 'Document')
+    def test_publish_and_close(self):
+        factory = self.root.manage_addProduct['Silva']
+        factory.manage_addMockupVersionedContent('document', 'Document')
         document = self.root.document
 
+        # First publication
         with AssertLog(
             self,
-            [['editor', 'publish', '/root/document/0']]):
-            # First publication
-            publish_content(document)
+            [['editor', 'approve', '/root/document/0'],
+             ['editor', 'publish', '/root/document/0']]):
+            IPublicationWorkflow(document).publish()
 
+        # Create copy
         with AssertLog(
             self,
             [['editor', 'add', '/root/document/1'],
              ['editor', 'modify the container', '/root/document']]):
-            # Create copy
-            document.create_copy()
+            IPublicationWorkflow(document).new_version()
 
+        # Publish copy (so close the published one first)
         with AssertLog(
             self,
-            [['editor', 'close', '/root/document/0'],
+            [['editor', 'approve', '/root/document/1'],
+             ['editor', 'close', '/root/document/0'],
              ['editor', 'publish', '/root/document/1']]):
-            # Publish copy (so close the published one first)
-            publish_content(document)
+            IPublicationWorkflow(document).publish()
+
+    def test_approve_revoke(self):
+        factory = self.root.manage_addProduct['Silva']
+        factory.manage_addMockupVersionedContent('document', 'Document')
+        document = self.root.document
+
+        self.layer.login('editor')
+
+        # Approve
+        with AssertLog(
+            self,
+            [['editor', 'approve', '/root/document/0']]):
+            when = datetime.now() + timedelta(1)
+            IPublicationWorkflow(document).approve(when)
+
+        # Revoke
+        with AssertLog(
+            self,
+            [['editor', 'revoke', '/root/document/0']]):
+            IPublicationWorkflow(document).revoke_approval()
 
     def test_request_approval(self):
-        self.layer.login('author')
-        factory = self.root.manage_addProduct['SilvaDocument']
-        factory.manage_addDocument('document', 'Document')
-
+        factory = self.root.manage_addProduct['Silva']
+        factory.manage_addMockupVersionedContent('document', 'Document')
         document = self.root.document
-        document.set_unapproved_version_publication_datetime(
-            DateTime.DateTime() - 10)
 
+        self.layer.login('author')
+
+        # Request approval
         with AssertLog(
             self,
             [['author', 'request approval', '/root/document/0']]):
-            # Request approval
-            document.request_version_approval('Ready')
+            IPublicationWorkflow(document).request_approval('Ready')
 
+        # Withdraw approval
         with AssertLog(
             self,
             [['author', 'cancel request approval', '/root/document/0']]):
-            # Withdraw approval
-            document.withdraw_version_approval('Not really ready')
+            adapter = IPublicationWorkflow(document)
+            adapter.withdraw_request('Not really ready')
 
-        document.request_version_approval('Ready')
+        IPublicationWorkflow(document).request_approval('Ready')
         self.layer.login('chiefeditor')
 
+        # Reject approval
         with AssertLog(
             self,
-            [['chiefeditor', 'cancel request approval', '/root/document/0']]):
-            # Reject approval
-            document.withdraw_version_approval('Not really ready')
+            [['chiefeditor', 'reject request approval', '/root/document/0']]):
+            IPublicationWorkflow(document).reject_request('Not really ready')
 
 
 def test_suite():
