@@ -55,10 +55,12 @@ def log_move(content, event):
                 get_path(event.newParent), event.newName)
             SecurityEvent('move', content, detail).log()
 
-@grok.subscribe(ISilvaObject, events.IContentOrderChangedEvent)
-def log_order_changed(content, event):
-    detail = 'from %s to %s' % (event.old_position, event.new_position)
-    SecurityEvent('order changed', content, detail).log()
+if hasattr(events, 'IContentOrderChangedEvent'):
+    # Only available in Silva 3.0
+    @grok.subscribe(ISilvaObject, events.IContentOrderChangedEvent)
+    def log_order_changed(content, event):
+        detail = 'from %s to %s' % (event.old_position, event.new_position)
+        SecurityEvent('order changed', content, detail).log()
 
 
 # Security changes
@@ -90,9 +92,16 @@ def log_security_remove_role(content, event):
 def log_publication_request_approval(content, event):
     SecurityEvent('request approval', content).log()
 
-@grok.subscribe(IVersion, events.IContentApprovalRequestWithdrawnEvent)
-def log_publication_approval_request_cancel(content, event):
-    SecurityEvent('cancel request approval', content).log()
+if hasattr(events, 'IContentApprovalRequestWithdrawnEvent'):
+    # Silva 3.0
+    @grok.subscribe(IVersion, events.IContentApprovalRequestWithdrawnEvent)
+    def log_publication_approval_request_withdrawn(content, event):
+        SecurityEvent('cancel request approval', content).log()
+else:
+    # Silva 2.3+
+    @grok.subscribe(IVersion, events.IContentApprovalRequestCanceledEvent)
+    def log_publication_approval_request_cancel(content, event):
+        SecurityEvent('cancel request approval', content).log()
 
 @grok.subscribe(IVersion, events.IContentApprovalRequestRefusedEvent)
 def log_publication_approval_request_refused(content, event):

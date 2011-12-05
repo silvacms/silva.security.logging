@@ -67,6 +67,10 @@ class ISQLStorageConfiguration(Interface):
     sql_connection_id = schema.Choice(
         title=u"SQL Connection",
         source=available_sql_connections)
+    sql_table = schema.TextLine(
+        title=u"SQL Table to use",
+        default=u"log",
+        required=True)
 
 
 class ISecurityLoggingService(

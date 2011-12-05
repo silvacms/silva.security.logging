@@ -30,6 +30,11 @@ have a table called ``log`` created like this::
 
    This table is not automatically created for you.
 
+.. note::
+
+   You can name your table differently, and configure the name on the
+   service.
+
 The log storage is extensible, you can provide your own storage.
 
 

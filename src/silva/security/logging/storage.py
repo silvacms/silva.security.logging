@@ -37,16 +37,17 @@ class ZopeSQLLogger(object):
     """
     grok.implements(ILogger)
 
-    def __init__(self, connection):
+    def __init__(self, connection, table='log'):
         self.connection = connection
+        self.table = table
 
     def log(self, event):
         db = self.connection()
         try:
-            db.query("""insert into log
+            db.query("""insert into %s
                         (username, action, time, content, content_intid, info)
                         values (%r, %r, now(), %r, %d, %r)""" % (
-                    event.username, event.action,
+                    self.table, event.username, event.action,
                     event.content_path, event.content_id,
                     event.detail or ""))
         finally:
@@ -65,11 +66,12 @@ class ZopeSQLStorage(grok.GlobalUtility):
             logger.error('SQL logger not properly configured')
             return None
         connection_id = context.storage_conf['sql_connection_id']
+        table = str(context.storage_conf.get('sql_table', 'log'))
         try:
             connection = getattr(context, connection_id)
         except AttributeError:
             logger.error('SQL connection %s no longer exists' % connection_id)
-        return ZopeSQLLogger(connection)
+        return ZopeSQLLogger(connection, table)
 
 
 class MemoryLogger(grok.GlobalUtility):
