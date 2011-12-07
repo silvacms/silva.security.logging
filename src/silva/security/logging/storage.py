@@ -71,6 +71,7 @@ class ZopeSQLStorage(grok.GlobalUtility):
             connection = getattr(context, connection_id)
         except AttributeError:
             logger.error('SQL connection %s no longer exists' % connection_id)
+            return None
         return ZopeSQLLogger(connection, table)
 
 

@@ -54,5 +54,6 @@ class SecurityEvent(object):
         service = queryUtility(ISecurityLoggingService)
         if service is not None:
             logger = service.get_logger()
-            logger.log(self)
+            if logger is not None:
+                logger.log(self)
 
