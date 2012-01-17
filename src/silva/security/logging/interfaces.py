@@ -49,7 +49,7 @@ def available_storages(context):
 @grok.provider(IContextSourceBinder)
 def available_sql_connections(context):
     return SimpleVocabulary(
-        map(lambda (name, title): SimpleTerm(value=name, title=title),
+        map(lambda (title, name): SimpleTerm(value=name, title=title),
             SQLConnectionIDs(aq_inner(context))))
 
 
