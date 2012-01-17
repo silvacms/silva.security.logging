@@ -44,12 +44,14 @@ class ZopeSQLLogger(object):
     def log(self, event):
         db = self.connection()
         try:
-            db.query("""insert into %s
+            sql_query = """insert into %s
                         (username, action, time, content, content_intid, info)
                         values (%r, %r, now(), %r, %d, %r)""" % (
-                    self.table, event.username, event.action,
-                    event.content_path, event.content_id,
-                    event.detail or ""))
+                self.table, event.username, event.action,
+                event.content_path, event.content_id,
+                event.detail or "")
+            logger.info(sql_query)
+            db.query(sql_query)
         finally:
             db.close()
 
