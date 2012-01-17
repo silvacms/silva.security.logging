@@ -50,7 +50,7 @@ class ZopeSQLLogger(object):
                 self.table, event.username, event.action,
                 event.content_path, event.content_id,
                 event.detail or "")
-            logger.info(sql_query)
+            logger.warn(sql_query)
             db.query(sql_query)
         finally:
             db.close()
