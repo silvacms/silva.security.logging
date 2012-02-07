@@ -10,7 +10,7 @@ from zope.keyreference.interfaces import NotYet
 from zope.component import queryUtility
 
 from silva.security.logging.interfaces import (
-    ISecurityEvent, ISecurityLoggingService)
+    ILoggingEvent, ISecurityLoggingService)
 
 
 def get_username():
@@ -38,10 +38,10 @@ def get_id(content):
     return 0
 
 
-class SecurityEvent(object):
+class LoggingEvent(object):
     """Represent an event.
     """
-    grok.implements(ISecurityEvent)
+    grok.implements(ILoggingEvent)
 
     def __init__(self, action, content, detail=None):
         self.action = action
@@ -49,11 +49,26 @@ class SecurityEvent(object):
         self.content_path = get_path(content)
         self.content_id = get_id(content)
         self.detail = detail
+        self._service = None
+
+    def get_service(self):
+        if self._service is None:
+            self._service = queryUtility(ISecurityLoggingService)
+        return self._service
 
     def log(self):
-        service = queryUtility(ISecurityLoggingService)
+        service = self.get_service()
         if service is not None:
             logger = service.get_logger()
             if logger is not None:
                 logger.log(self)
 
+    def enable(self):
+        service = self.get_service()
+        if service is not None:
+            service.enable_logging = True
+
+    def disable(self):
+        service = self.get_service()
+        if service is not None:
+            service.enable_logging = False

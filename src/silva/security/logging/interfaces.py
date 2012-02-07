@@ -15,9 +15,21 @@ from Acquisition import aq_inner
 from silva.core.interfaces import ISilvaLocalService
 
 
-class ISecurityEvent(Interface):
+class ILoggingEvent(Interface):
     """A security event.
     """
+
+    def log():
+        """Record the event in the log.
+        """
+
+    def disable():
+        """Disable all recording of event in the logs.
+        """
+
+    def enable():
+        """Enable all recoding of event in the logs.
+        """
 
 
 class ILoggingStorage(Interface):
@@ -56,8 +68,12 @@ def available_sql_connections(context):
 class ISecurityLoggingConfiguration(Interface):
     """Configuration for the Security Logging service.
     """
+    enable_logging = schema.Bool(
+        title=u"Enable logging",
+        description=u"Check this to effectively enable logging",
+        default=True)
     storage_name = schema.Choice(
-        title=u"Log storage",
+        title=u"Logging storage",
         source=available_storages)
 
 

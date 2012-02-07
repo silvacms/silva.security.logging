@@ -23,6 +23,7 @@ class SecurityLoggingService(SilvaService):
     grok.implements(ISecurityLoggingService)
     silvaconf.icon('service.png')
 
+    enable_logging = True       # Default, BBB
     manage_options = (
         {'label': 'Access log', 'action': 'manage_main'},
         {'label': 'Configuration', 'action': 'manage_config'},
@@ -37,7 +38,9 @@ class SecurityLoggingService(SilvaService):
         return getUtility(ILoggingStorage, name=self.storage_name)
 
     def get_logger(self):
-        return self.get_storage().configure(self)
+        if self.enable_logging:
+            return self.get_storage().configure(self)
+        return None
 
 
 class ViewLog(silvaviews.ZMIView):
