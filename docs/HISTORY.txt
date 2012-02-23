@@ -1,10 +1,17 @@
 Changes
 =======
 
-1.2 (unreleased)
+1.2 (2012/02/23)
 ----------------
 
-* ...
+* Make sure the code works on both Silva 2.3 and 3.0.
+
+* Disable logging during upgrade operations (for speed).
+
+* Prevent breakage when storage is misconfigured.
+
+* Add possibility to configure table name with SQL storage.
+
 
 1.1 (2011/11/14)
 ----------------
