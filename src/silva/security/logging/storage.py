@@ -43,12 +43,14 @@ class ZopeSQLLogger(object):
 
     def log(self, event):
         db = self.connection()
-        db.query("""insert into %s
+        query = """insert into %s
                         (username, action, time, content, content_intid, info)
                         values (%r, %r, now(), %r, %d, %r)""" % (
                 self.table, event.username, event.action,
                 event.content_path, event.content_id,
-                event.detail or ""))
+                event.detail or "")
+        logger.warn(query)
+        db.query(query)
 
 
 class ZopeSQLStorage(grok.GlobalUtility):
