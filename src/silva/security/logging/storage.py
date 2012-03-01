@@ -49,7 +49,6 @@ class ZopeSQLLogger(object):
                 self.table, event.username, event.action,
                 event.content_path, event.content_id,
                 event.detail or "")
-        logger.warn(query)
         db.query(query)
 
 
