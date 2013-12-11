@@ -9,7 +9,7 @@ tests_require = [
 
 setup(name='silva.security.logging',
       version=version,
-      description="Log all Silva actions",
+      description="Log all actions inside Silva CMS in a file or SQL table",
       long_description=open("README.txt").read() + "\n" +
                        open(os.path.join("docs", "HISTORY.txt")).read(),
       classifiers=[
@@ -21,7 +21,7 @@ setup(name='silva.security.logging',
       keywords='silva cms zope security',
       author='Infrae',
       author_email='info@infrae.com',
-      url='http://infrae.com/products/silva',
+      url='https://github.com/silvacms/silva.security.logging',
       license='BSD',
       package_dir={'': 'src'},
       packages=find_packages('src', exclude=['ez_setup']),

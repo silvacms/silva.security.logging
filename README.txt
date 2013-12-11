@@ -5,7 +5,7 @@ silva.security.logging
 Introduction
 ============
 
-This extensions log in details user actions in Silva. To do so, you
+This extensions log in details user actions in `Silva`_. To do so, you
 need to add a *Silva Security Logging Service* in ZMI, in a site
 (either your Silva Root or a local site).
 
@@ -41,5 +41,7 @@ The log storage is extensible, you can provide your own storage.
 Code repository
 ===============
 
-You can find the code for this extension in Mercurial:
-https://hg.infrae.com/silva.security.logging/.
+You can find the code for this extension in Git:
+https://github.com/silvacms/silva.security.logging
+
+.. _Silva: http://silvacms.org
